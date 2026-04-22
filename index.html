@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出席照合用コード発行</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f8f9fa; margin: 0; padding: 10px; text-align: center; }
+        h1 { margin: 10px 0; font-size: 22px; color: #333; }
+        .description { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .controls { margin-bottom: 15px; position: sticky; top: 0; background: #f8f9fa; padding: 10px; z-index: 100; }
+        button { padding: 12px 24px; font-size: 16px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button:hover { background: #0056b3; }
+
+        /* 追加：警告の原因だったスタイルをここに移動 */
+        #tables-wrapper {
+            display: contents;
+        }
+
+        .table-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        table { border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 22%; min-width: 180px; margin-bottom: 15px; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #eee; padding: 10px 2px; text-align: center; }
+        th { background-color: #444; color: white; font-size: 12px; font-weight: normal; }
+        .no-col { background: #f1f1f1; font-weight: bold; width: 50px; color: #555; font-size: 18px; }
+        .pass-code { font-family: 'Monaco', 'Consolas', monospace; font-weight: bold; color: #e44d26; font-size: 24px; letter-spacing: 2px; }
+
+        @media (max-width: 800px) {
+            table { width: 45%; } /* スマホで見やすいよう2列並びを意識 */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>本日の出席確認用コード</h1>
+    <p class="description">※出席番号に対応する3桁のコードをフォームに入力してください</p>
+    
+    <div class="controls">
+        <button onclick="generateTable()">コードを更新（再発行）</button>
+    </div>
+
+    <div class="table-container">
+        <div id="tables-wrapper"></div>
+    </div>
+
+    <script>
+        // 見間違いを防ぐため、0, 1, 7（書き方で1に見える）を除いた数字から生成
+        const safeDigits = ['2', '3', '4', '5', '6', '8', '9'];
+
+        function generateShortPass() {
+            let pass = "";
+            for (let i = 0; i < 3; i++) {
+                pass += safeDigits[Math.floor(Math.random() * safeDigits.length)];
+            }
+            return pass;
+        }
+
+        function generateTable() {
+            const wrapper = document.getElementById("tables-wrapper");
+            wrapper.innerHTML = "";
+            
+            // 4つのテーブルを作成（10行ずつ）
+            for (let t = 0; t < 4; t++) {
+                const table = document.createElement("table");
+                table.innerHTML = `<thead><tr><th>番号</th><th>コードA</th><th>コードB</th></tr></thead><tbody id="body-${t}"></tbody>`;
+                wrapper.appendChild(table);
+                
+                const tbody = document.getElementById(`body-${t}`);
+                for (let i = 1; i <= 10; i++) {
+                    const studentNo = t * 10 + i;
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td class="no-col">${studentNo}</td>
+                        <td class="pass-code">${generateShortPass()}</td>
+                        <td class="pass-code">${generateShortPass()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+        }
+        window.onload = generateTable;
+    </script>
+</body>
+</html>
